@@ -28,6 +28,10 @@ query Query {
         expired
       }
       delivered
+      customPrice
+      comment
+      createdAt
+      updatedAt
     }
   }
 `

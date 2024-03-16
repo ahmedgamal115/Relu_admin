@@ -8,6 +8,7 @@ import { useMutation, useQuery } from '@apollo/client';
 import { TrashIcon, TruckIcon } from '@heroicons/react/24/solid';
 import { GiEmptyChessboard } from "react-icons/gi";
 import LazyLoad from 'react-lazyload';
+import moment from 'moment';
 
 
 
@@ -24,6 +25,12 @@ const Orders = () => {
       headerName: 'Username',
       width: 150,
       editable: false,
+      valueGetter: (params)=>{
+        return params.value
+      },
+      renderCell: (params)=>(
+        <p className='text-xl'>{ params.value }</p>
+      )
     },
     {
       field: 'phone',
@@ -137,7 +144,7 @@ const Orders = () => {
         <p className={`${(params.row.discountCode) ? 'line-through' : 'no-underline'} `}>{params.row.productOrder[0].price} EGP</p>
       :
         <div className='flex justify-center items-center gap-3 text-wrap text-center'>
-            <p>Price will be customized</p>
+            <p>{ params.row.customPrice }</p>
         </div>
     },
     {
@@ -173,15 +180,21 @@ const Orders = () => {
       headerName: 'Price after discount',
       width: 200,
       renderCell: (params)=>(
-        (params.row.discountCode) ?
+        (params.row.discountCode) && params.row.productOrder.length !== 0 ?
           <p>{ params.row.productOrder[0].price - (params.row.productOrder[0].price * (params.row.discountCode.discount/100)) } EGP</p>
           :
           (params.row.productOrder.length !== 0) ?
             <p>{params.row.productOrder[0].price} EGP</p>
-          :
-            <div className='flex justify-center items-center gap-3 text-wrap text-center'>
-                <p>Price will be customized</p>
-            </div>
+          :""
+      )
+    },
+    {
+      field: 'comment',
+      headerName: 'Comment',
+      width: 300,
+      editable: false,
+      renderCell: (params)=>(
+        <p className='text-xl'>{ params.value }</p>
       )
     },
     {
@@ -206,6 +219,14 @@ const Orders = () => {
             <p className='font-palanquin font-bold' >Custom</p>
           </>
       ),
+    },
+    { 
+      field: 'createdAt', 
+      headerName: 'order Date', 
+      width: 180,
+      type: 'date',
+      valueFormatter: params => 
+        moment(params?.value).format("DD/MM/YYYY hh:mm A"),
     },
     {
       field: 'delivered',

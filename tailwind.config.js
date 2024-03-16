@@ -38,6 +38,9 @@ export default {
         'hero': "url('./src/assets/Images/pexels-henry-&-co-1939485.jpg')",
         'card': "url('./src/assets/Images/pexels-ani-ani-14305154.jpg')",
       },
+      backgroundColor:{
+        'layout': 'rgb(0 0 0 / 53%)',
+      },
       screens: {
         "wide": "1440px"
       }

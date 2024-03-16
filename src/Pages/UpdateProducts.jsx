@@ -7,12 +7,12 @@ import { GetProducts, GetSizes } from '../gql/Query'
 import LazyLoad from 'react-lazyload';
 import { UpdateProduct } from '../gql/Mutation';
 const UpdateProducts = () => {
-    const { loading, error, data} = useQuery(GetProducts)
+    const { loading, error, data } = useQuery(GetProducts)
     const  sizeData  = useQuery(GetSizes)
-    const [updateProduct] = useMutation(UpdateProduct,{
-      refetchQueries: [{query:GetProducts}],
+    const [updateProduct,load] = useMutation(UpdateProduct,{
       onCompleted: ()=>{
         setValues(null)
+        window.location.reload()
       }
     })
     const [rowModesModel, setRowModesModel] = useState({});
@@ -143,14 +143,17 @@ const UpdateProducts = () => {
       });
     };
     const handleSaveClick = (params) => () => {
-      console.log(values)
       updateProduct({
-        variables: values
+        variables: values,
+        refetchQueries:()=>[{
+          query: GetProducts
+        }],
+      }).then(async()=>{
+        setRowModesModel({
+          ...rowModesModel,
+          [params.id]: { mode: GridRowModes.View },
+        });
       })
-      setRowModesModel({
-        ...rowModesModel,
-        [params.id]: { mode: GridRowModes.View },
-      });
     };
     
 
@@ -163,7 +166,7 @@ const UpdateProducts = () => {
         renderCell: (params)=>(
           params.value.map((image,idx)=>(
               image ? 
-                <LazyLoad height={150} once key={idx}>
+              <LazyLoad height={150} once key={idx}>
                   <img 
                   src={`${image}`}
                   alt="Product"
@@ -263,7 +266,20 @@ const UpdateProducts = () => {
     if(loading) return <p>Loading...</p>
     if(error) return <p>Error! {console.log(error)}</p>
   return (
-    <div className='w-full flex justify-center items-center'>
+    <div className='relative w-full flex justify-center items-center'>
+      {
+        load.loading &&
+          <div className='fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]
+          w-[50%] h-[50%] bg-layout z-50 flex justify-center items-center'>
+            <div
+              className="inline-block h-14 w-14 animate-spin rounded-full 
+              border-[10px] border-solid border-current border-e-transparent 
+              align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] 
+              dark:text-white"
+              role="status">
+            </div>
+          </div>
+      }
       <Box sx={{ height: 600 }} className='w-fit'>
         <DataGrid
           key={data.productsFeed.id}
@@ -282,6 +298,7 @@ const UpdateProducts = () => {
           pageSizeOptions={[5]}
           checkboxSelection
           disableRowSelectionOnClick
+          
           // onRowModesModelChange={handleRowModesModelChange}
           getRowHeight={getRowHeight}
         />
