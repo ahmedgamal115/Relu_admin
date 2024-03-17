@@ -11,14 +11,15 @@ mutation AddProduct($deliverOrderId: ID!) {
 }
 `
 const AddPromoCode = gql`
-mutation AddProduct($code: String!, $discount: Float!, $expire: String!) {
-    addPromoCode(code: $code, discount: $discount, expire: $expire) {
-      id
-      code
-      discount
-      expire
-      expired
-    }
+mutation Mutation($code: String!, $expire: String!, $discount: Float, $amount: Float) {
+  addPromoCode(code: $code, expire: $expire, discount: $discount, amount: $amount) {
+    id
+    code
+    discount
+    amount
+    expire
+    expired
+  }
 }
 `
 const AddProduct = gql`

@@ -7,6 +7,7 @@ import { AddPromoCode } from '../gql/Mutation'
 import { GetPromoCode } from '../gql/Query'
 import { DataGrid } from '@mui/x-data-grid';
 import { Alert, Box } from '@mui/material';
+import { DiPhonegap } from "react-icons/di";
 
 const PromoCode = () => {
   const columns = [
@@ -22,9 +23,23 @@ const PromoCode = () => {
       width: 120,
       editable: false,
       renderCell: (params) =>(
-        <p>{params.row.discount} %</p>
+        params.row.discount ?
+          <p>{params.row.discount} %</p>
+        :
+          <DiPhonegap className='w-14 h-14' />
       )
-        
+    },
+    {
+      field: 'amount',
+      headerName: 'Amount',
+      width: 120,
+      editable: false,
+      renderCell: (params) =>(
+        params.row.amount ?
+          <p>{params.row.amount} EGP</p>
+        :
+          <DiPhonegap className='w-14 h-14' />
+      )
     },
     {
       field: 'expire',
@@ -47,10 +62,16 @@ const PromoCode = () => {
       )
     },
   ];
-  const [values,setValues] = useState({"code":"","discount":"","expire":null})
+  const [values,setValues] = useState({"code":"","expire":null})
   const [showAlert , setAlert] = useState(false)
   const [ alertMsg , setAlertMsg] = useState("")
+  const [ discountInp , setDiscountInp] = useState("")
+  const [ amountInp , setAmountInp] = useState("")
   const [addPromoCode] = useMutation(AddPromoCode,{
+    onError: ({graphQLErrors})=>{
+      setAlert(true)
+      setAlertMsg(graphQLErrors[0].message)
+    },
     refetchQueries:[{
       query: GetPromoCode
     }]
@@ -59,16 +80,20 @@ const PromoCode = () => {
 
   const handleSubmitData = (e)=>{
     e.preventDefault()
-    if(values.code === "" || values.discount === "" || values.expire === null){
+    if(values.code === "" || values.expire === null){
+      setAlert(true)
+      setAlertMsg("Please full all data require")
+    }else if(!values.discount && !values.amount ){
       setAlert(true)
       setAlertMsg("Please full all data require")
     }else{
+      console.log(values)
       addPromoCode({variables:values})
-      setValues({"code":"","discount":"","expire":null})
+      setValues({"code":"","discount":"","amount":"","expire":null})
       setAlert(false)
     }
   }
-  const getRowHeight = (params) => {
+  const getRowHeight = () => {
     return 100; 
   };
 
@@ -81,7 +106,8 @@ const PromoCode = () => {
         <div className="space-y-12">
           <div className="border-b border-gray-900/10 pb-12">
 
-            <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+            <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-9">
+              
               <div className="sm:col-span-3">
                 <label htmlFor="first-name" className="block text-sm font-medium leading-6 text-gray-900">
                   Code
@@ -100,7 +126,7 @@ const PromoCode = () => {
                 </div>
               </div>
 
-              <div className="sm:col-span-3">
+              <div className="sm:col-span-1">
                 <label htmlFor="last-name" className="block text-sm font-medium leading-6 text-gray-900">
                   Discount
                 </label>
@@ -108,15 +134,42 @@ const PromoCode = () => {
                   <input
                     type="number"
                     name="discount"
-                    value={values.discount}
+                    value={discountInp}
                     id="Discount"
-                    className="block w-[10%] px-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    className="block lg:w-[100%] sm:w-[40%] px-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                     onChange={(e)=>{
-                      setValues({...values,[e.target.name]: parseFloat(e.target.value)})
+                      setDiscountInp(e.target.value)
+                      e.target.value !== '' ? 
+                        setValues({...values,[e.target.name]: parseFloat(e.target.value)})
+                      :
+                        setValues({...values,[e.target.name]: null})
                     }}
                   />
                 </div>
               </div>
+
+              <div className="sm:col-span-3">
+                <label htmlFor="last-name" className="block text-sm font-medium leading-6 text-gray-900">
+                  Amount
+                </label>
+                <div className="mt-2">
+                  <input
+                    type="number"
+                    name="amount"
+                    value={amountInp}
+                    id="Amount"
+                    className="block w-[40%] px-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    onChange={(e)=>{
+                      setAmountInp(e.target.value)
+                      e.target.value !== '' ? 
+                        setValues({...values,[e.target.name]: parseFloat(e.target.value)})
+                        :
+                        setValues({...values,[e.target.name]: null})
+                    }}
+                  />
+                </div>
+              </div>
+
               <div className="sm:col-span-4">
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePicker
@@ -159,7 +212,7 @@ const PromoCode = () => {
       {
         data && 
         <div className='w-full'>
-          <Box className='lg:w-[50%] sm:w-full max-sm:w-full sm:p-4 max-sm:p-4' >
+          <Box className='lg:w-[60%] sm:w-full max-sm:w-full sm:p-4 max-sm:p-4' >
             <DataGrid
               rows={data.promocodes}
               columns={columns}

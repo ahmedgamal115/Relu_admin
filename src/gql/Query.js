@@ -25,6 +25,7 @@ query Query {
       discountCode {
         code
         discount
+        amount
         expired
       }
       delivered
@@ -41,6 +42,7 @@ query Query {
       id
       code
       discount
+      amount
       expire
       expired
     }

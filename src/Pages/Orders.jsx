@@ -43,6 +43,15 @@ const Orders = () => {
       headerName: 'Anther phone',
       width: 200,
       editable: false,
+      renderCell: (params) =>(
+        (params.value) ?
+          <p>{params.value.code}</p>
+        :
+        <div className='flex justify-center items-center gap-3'>
+          <GiEmptyChessboard className='w-10 h-10 '/>
+          <p>No data</p>
+        </div>
+      )
     },
     {
       field: 'address',
@@ -167,7 +176,10 @@ const Orders = () => {
       width: 160,
       renderCell: (params)=>(
         (params.row.discountCode) ?
-          <p>{params.row.discountCode.discount} %</p>
+          params.row.discountCode.discount ? 
+            <p>{params.row.discountCode.discount} %</p>
+          :
+            <p>{params.row.discountCode.amount} EGP</p>
         :
         <div className='flex justify-center items-center gap-3'>
           <GiEmptyChessboard className='w-10 h-10 '/>
@@ -181,8 +193,11 @@ const Orders = () => {
       width: 200,
       renderCell: (params)=>(
         (params.row.discountCode) && params.row.productOrder.length !== 0 ?
-          <p>{ params.row.productOrder[0].price - (params.row.productOrder[0].price * (params.row.discountCode.discount/100)) } EGP</p>
+          params.row.discountCode.discount ?
+            <p>{ params.row.productOrder[0].price - (params.row.productOrder[0].price * (params.row.discountCode.discount/100)) } EGP</p>
           :
+            <p>{ params.row.productOrder[0].price - params.row.discountCode.amount } EGP</p>
+        :
           (params.row.productOrder.length !== 0) ?
             <p>{params.row.productOrder[0].price} EGP</p>
           :""
@@ -194,7 +209,13 @@ const Orders = () => {
       width: 300,
       editable: false,
       renderCell: (params)=>(
-        <p className='text-xl'>{ params.value }</p>
+        params.value?
+          <p className='text-xl'>{ params.value }</p>
+        :
+          <div className='flex justify-center items-center gap-3'>
+            <GiEmptyChessboard className='w-10 h-10 '/>
+            <p>No data</p>
+          </div>
       )
     },
     {
